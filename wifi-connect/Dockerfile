@@ -9,8 +9,12 @@
 # because NetworkManager's D-Bus property types changed after that build.
 #
 # This mirrors upstream's own Dockerfile.template (paths, packages, layout) so it
-# behaves the way the project expects. The only deliberate difference is in
-# start.sh - see the comment there.
+# behaves the way the project expects. start.sh is upstream's scripts/start.sh
+# with its optional sleep enabled and raised to 60s: after a power cut the Pi
+# boots well before the router, and checking too early raises a needless hotspot.
+#
+# That script checks once per boot. A frame that loses its network later stays
+# offline until it is power-cycled - accepted, in exchange for no custom logic.
 
 FROM balenalib/raspberrypi4-64-debian:bookworm-run
 
@@ -21,9 +25,7 @@ ARG WIFI_CONNECT_VERSION=v4.11.84
 # dnsmasq: wifi-connect serves DHCP and DNS while the portal is up - the captive
 #   portal only works because DNS resolves everything back to the device.
 # wireless-tools: iwgetid, upstream's default connectivity probe.
-# network-manager: for nmcli, used by start.sh; the daemon it installs is never
-#   started - the real NetworkManager runs on the host.
-RUN install_packages curl ca-certificates dnsmasq wireless-tools network-manager
+RUN install_packages curl ca-certificates dnsmasq wireless-tools
 
 # Upstream's layout, and not arbitrary: wifi-connect resolves its UI directory
 # *relative to the working directory*, so the binary at /usr/src/app expects the

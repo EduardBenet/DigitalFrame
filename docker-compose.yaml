@@ -56,9 +56,11 @@ services:
       # The hotspot name the family will see on their phone. Keep it recognisable
       # - this is the only instruction they get.
       - PORTAL_SSID=MarcDigital Setup
-      # Give a known network time to associate on boot first, so a normal reboot
-      # does not briefly raise a setup hotspot.
-      - DELAY_BEFORE_CONFIGURING=30
+      # Read by wifi-connect itself: take the hotspot down after 10 minutes with
+      # nobody using it, handing the radio back so NetworkManager can rejoin the
+      # saved network. Without it, a frame that booted before the router (a
+      # power cut) would hold the hotspot up, and stay offline, forever.
+      - ACTIVITY_TIMEOUT=600
 
 volumes:
   synced_photos:
